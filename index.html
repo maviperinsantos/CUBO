@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubo 3D Minimalista</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000; /* Fundo totalmente preto */
+            overflow: hidden;
+            perspective: 1000px;
+            cursor: grab;
+        }
+
+        body:active { cursor: grabbing; }
+
+        .scene {
+            width: 300px;
+            height: 300px;
+            transform-style: preserve-3d;
+        }
+
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(-30deg) rotateY(-45deg);
+        }
+
+        .face {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            background: #fff; /* Todas as faces brancas */
+            border: 1px solid #000;
+            box-sizing: border-box;
+        }
+
+        /* Posicionamento das Faces */
+        .front  { transform: translateZ(150px); }
+        .back   { transform: rotateY(180deg) translateZ(150px); }
+        .right  { transform: rotateY(90deg) translateZ(150px); }
+        .left   { transform: rotateY(-90deg) translateZ(150px); }
+        .top    { transform: rotateX(90deg) translateZ(150px); }
+        .bottom { transform: rotateX(-90deg) translateZ(150px); }
+
+        /* Divisões 3x3 (Linhas pretas sobre o branco) */
+        .cell {
+            border: 2px solid #000; 
+            box-sizing: border-box;
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            color: #555;
+            font-family: sans-serif;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scene">
+        <div class="cube" id="cube"></div>
+    </div>
+
+    <div class="instructions">Arraste para girar • Total White Edition</div>
+
+    <script>
+        const cube = document.getElementById('cube');
+        const faces = ['front', 'back', 'right', 'left', 'top', 'bottom'];
+        
+        faces.forEach(faceName => {
+            const faceDiv = document.createElement('div');
+            faceDiv.className = `face ${faceName}`;
+            
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                faceDiv.appendChild(cell);
+            }
+            cube.appendChild(faceDiv);
+        });
+
+        let isDragging = false;
+        let startX, startY;
+        let rotateX = -30, rotateY = -45;
+
+        const startMove = (e) => {
+            isDragging = true;
+            startX = e.clientX || e.touches[0].clientX;
+            startY = e.clientY || e.touches[0].clientY;
+        };
+
+        const move = (e) => {
+            if (!isDragging) return;
+            const x = e.clientX || e.touches[0].clientX;
+            const y = e.clientY || e.touches[0].clientY;
+            
+            const deltaX = x - startX;
+            const deltaY = y - startY;
+
+            rotateY += deltaX * 0.5;
+            rotateX -= deltaY * 0.5;
+
+            cube.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+            startX = x;
+            startY = y;
+        };
+
+        const stopMove = () => isDragging = false;
+
+        document.addEventListener('mousedown', startMove);
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', stopMove);
+        document.addEventListener('touchstart', startMove);
+        document.addEventListener('touchmove', move);
+        document.addEventListener('touchend', stopMove);
+    </script>
+</body>
+</html>
